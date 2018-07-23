@@ -32,10 +32,12 @@ public class AdapterForNote extends RecyclerView.Adapter<AdapterForNote.ViewHold
 
     private List<Note> ListNote;
     private Context context;
+    private MainActivity.OnPositionListener listener;
 
-    public AdapterForNote(List<Note> listNote, Context context) {
+    public AdapterForNote(List<Note> listNote, Context context, MainActivity.OnPositionListener listener) {
         ListNote = listNote;
         this.context = context;
+        this.listener = listener;
     }
 
     @Override
@@ -59,7 +61,13 @@ public class AdapterForNote extends RecyclerView.Adapter<AdapterForNote.ViewHold
 
     @Override
     public int getItemCount() {
-        return ListNote.size();
+        try {
+            return ListNote.size();
+        } catch (NullPointerException e) {
+            e.printStackTrace();
+            return 0;
+        }
+
     }
 
     public void setSettings(ViewHolder holder) {
@@ -107,12 +115,15 @@ public class AdapterForNote extends RecyclerView.Adapter<AdapterForNote.ViewHold
             EditButton.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    Intent editNote = new Intent(context, EditActivity.class);
-                    editNote.putExtra("ID", id);
-                    editNote.putExtra("Name", Name.getText().toString());
-                    editNote.putExtra("Content", Content.getText().toString());
-                    context.startActivity(editNote);
+                    listener.onClick(context, getAdapterPosition(), id, Name.getText().toString(), Content.getText().toString());
                 }
+                //                @Override
+//                public void onClick(View v) {
+//                    Intent editNote = new Intent(context, EditActivity.class);
+//                    editNote.putExtra("ID", id);
+//                    editNote.putExtra("Name", Name.getText().toString());
+//                    editNote.putExtra("Content", Content.getText().toString());
+//                    context.startActivity(editNote);
             });
 
             DeleteButton.setOnClickListener(new View.OnClickListener() {
@@ -130,21 +141,13 @@ public class AdapterForNote extends RecyclerView.Adapter<AdapterForNote.ViewHold
                     new Thread(new Runnable() {
                         @Override
                         public void run() {
-                            MainActivity.NoteList.remove(id);
                             note = new Note(id, Name.getText().toString(), Date.getText().toString(), Content.getText().toString());
                             noteDao.deleteItem(note);
-                            //db.close();
                         }
                     }).start();
 
-                    Intent update = new Intent(context, MainActivity.class);
-                    update.addFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION);
-                    context.startActivity(update);
-
-                    //notifyDataSetChanged();   не работает
-//                    SimpleDateFormat format = new SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss", Locale.getDefault());
-//                    String date = format.format(new Date());
-
+                    ListNote.remove(getAdapterPosition());
+                    notifyDataSetChanged();
                 }
             });
         }

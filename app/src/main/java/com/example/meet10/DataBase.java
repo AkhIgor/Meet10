@@ -11,6 +11,5 @@ import android.content.Context;
 
 @Database(entities = {Note.class}, version = 1)
 public abstract class DataBase extends RoomDatabase {
-
     public abstract NoteDao getNoteDAO();
 }

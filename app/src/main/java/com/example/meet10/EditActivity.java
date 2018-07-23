@@ -21,10 +21,8 @@ public class EditActivity extends AppCompatActivity {
     private TextView name;
     private TextView content;
     private FloatingActionButton fab;
-    private NoteDao noteDao;
 
-    public static long id;
-    private Note note;
+    public long id;
     private String date;
 
     @Override
@@ -34,6 +32,10 @@ public class EditActivity extends AppCompatActivity {
 
         name = (TextView) findViewById(R.id.nameText);
         content = (TextView) findViewById(R.id.contentText);
+
+        SimpleDateFormat format = new SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss", Locale.getDefault());
+        date = format.format(new Date());
+
         fab = (FloatingActionButton)findViewById(R.id.floatingActionButton);
 
         Intent intent = getIntent();
@@ -43,35 +45,16 @@ public class EditActivity extends AppCompatActivity {
             id = intent.getLongExtra("ID", 1);
         } catch (NullPointerException ignored) {}
 
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-                DataBase db = MyRoom.getInstance().getDatabase();
-                noteDao = db.getNoteDAO();
-
-                SimpleDateFormat format = new SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss", Locale.getDefault());
-                date = format.format(new Date());
-            }
-        }).start();
 
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                note = new Note(id, name.getText().toString(), date, content.getText().toString());
-
-                new Thread(new Runnable() {
-                    @Override
-                    public void run() {
-                        noteDao.updateItem(note);
-                        MainActivity.NoteList = noteDao.getNotes();
-                        //db.close();
-                    }
-                }).start();
-
-//                Intent main = new Intent(EditActivity.this, MainActivity.class);
-//                startActivity(main);
-//                MainActivity.NoteList.remove(id);
-//                MainActivity.NoteList.add((int) id, note);
+                Intent main = new Intent();
+                main.putExtra("ID", id);
+                main.putExtra("Name", name.getText().toString());
+                main.putExtra("Date", date);
+                main.putExtra("Content", content.getText().toString());
+                setResult(RESULT_OK, main);
                 finish();
             }
         });

@@ -23,10 +23,8 @@ public class CreatingActivity extends AppCompatActivity {
     private TextView name;
     private TextView content;
     private FloatingActionButton fab;
-    private NoteDao noteDao;
 
     private String date;
-    private Note note;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -44,21 +42,11 @@ public class CreatingActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
 
-                note = new Note(name.getText().toString(), date, content.getText().toString());
-
-                new Thread(new Runnable() {
-                    @Override
-                    public void run() {
-                        DataBase db = MyRoom.getInstance().getDatabase();
-                        noteDao = db.getNoteDAO();
-                        noteDao.addItem(note);
-                        //db.close();
-                    }
-                }).start();
-
-                //Intent main = new Intent(CreatingActivity.this, MainActivity.class);
-                MainActivity.NoteList.add(note);
-                //startActivity(main);
+                Intent main = new Intent(CreatingActivity.this, MainActivity.class);
+                main.putExtra("Name", name.getText().toString());
+                main.putExtra("Date", date);
+                main.putExtra("Content", content.getText().toString());
+                setResult(RESULT_OK, main);
                 finish();
             }
         });
